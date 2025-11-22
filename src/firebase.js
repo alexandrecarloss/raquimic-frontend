@@ -1,13 +1,29 @@
-// Import the functions you need from the SDKs you need
+// Importações básicas
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// Firestore
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  addDoc,
+  doc,
+  deleteDoc,
+  updateDoc
+} from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Realtime Database
+import { getDatabase } from "firebase/database";
+
+// Auth (para login anônimo)
+import {
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged
+} from "firebase/auth";
+
+// Config padrão Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAnLBqHFVNntu-4rGpdVj2jEMGPjQvbUJA",
   authDomain: "raquimic-2025.firebaseapp.com",
@@ -19,17 +35,38 @@ const firebaseConfig = {
   measurementId: "G-27R4NYN4QD"
 };
 
-// Initialize Firebase
+// Inicialização
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+getAnalytics(app);
+
+// Firestore
 const db = getFirestore(app);
 
+// Realtime DB
+const rtdb = getDatabase(app);
+
+// Auth
+const auth = getAuth(app);
+
+// 🔥 LOGIN ANÔNIMO AUTOMÁTICO
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    signInAnonymously(auth).catch((err) => {
+      console.error("Erro no login anônimo:", err);
+    });
+  }
+});
+
+// Exportações
 export {
-  db,
+  db,              // Firestore
   collection,
   onSnapshot,
   addDoc,
   doc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+
+  rtdb,            // Realtime Database
+  auth             // auth opcional para uso futuro
 };

@@ -1,6 +1,6 @@
 <template>
-  <div class="h-screen flex items-center justify-center bg-gray-100">
-    <form @submit.prevent="login" class="bg-white p-8 rounded-xl shadow-md w-96">
+  <div class="h-screen flex items-center justify-center bg-gray-700">
+    <form @submit.prevent="login" class="bg-gray-900 p-8 rounded-xl shadow-md w-96">
       <h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
 
       <div class="mb-4">
