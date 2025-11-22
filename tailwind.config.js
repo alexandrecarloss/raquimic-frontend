@@ -4,7 +4,13 @@ module.exports = {
   safelist: [
     "w-0",
     "w-56",
-    "overflow-hidden"
+    "overflow-hidden",
+    "transition-all",
+    "duration-300",
+    "z-50",
+    "bg-gray-900",
+    "px-3",
+    "py-2"
   ],
   theme: { extend: {} },
   plugins: [],
