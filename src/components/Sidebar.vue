@@ -12,6 +12,7 @@
       <RouterLink to="/" class="sidebar-link">Dashboard</RouterLink>
       <RouterLink to="/perguntas" class="sidebar-link">Perguntas</RouterLink>
       <RouterLink to="/moleculas" class="sidebar-link">Moléculas</RouterLink>
+      <RouterLink to="/criar-quiz" class="sidebar-link">Criar Quiz</RouterLink>
       <button @click="auth.logout()" class="text-red-500">Sair</button>
 
     </nav>

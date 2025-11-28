@@ -5,9 +5,10 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import PerguntasView from '../views/PerguntasView.vue'
 import EditarPerguntaView from '../views/EditarPerguntaView.vue'
-import SalasView from '../views/SalasView.vue'
 import MoleculaFormView from '../views/MoleculaFormView.vue'
 import MoleculasView from '../views/MoleculasView.vue'
+import CriarQuizView from '../views/QuizPersonalizadoView.vue'
+import QuizPersonalizadoView from '../views/QuizPersonalizadoView.vue'
 
 const routes = [
   { path: "/login", meta: { public: true, name: 'login' }, component: LoginView },
@@ -42,13 +43,6 @@ const routes = [
   },
 
   {
-    path: '/salas',
-    name: 'salas',
-    component: SalasView,
-    meta: { requiresAuth: true }
-  },
-
-  {
     path: "/moleculas",
     name: "Moleculas",
     component: MoleculasView,
@@ -67,6 +61,20 @@ const routes = [
     props: true,
     meta: { requiresAuth: true }
   },
+  
+  {
+    path: "/quiz/personalizado",
+    name: "QuizPersonalizado",
+    component: QuizPersonalizadoView,
+    meta: { requiresAuth: true }
+  },
+
+  {
+    path: "/criar-quiz",
+    name: "CriarQuiz",
+    component: CriarQuizView,
+    meta: { requiresAuth: true }
+  }
 
 ]
 
