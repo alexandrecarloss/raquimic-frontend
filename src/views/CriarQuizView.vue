@@ -41,8 +41,8 @@ async function criarQuiz() {
     alert("Selecione pelo menos uma pergunta");
     return;
   }
-
-  const res = await api.post("/quiz/criar-personalizado/", {
+  
+  const res = await api.post("/quizzes", {
     perguntas: selecionadas.value,
   });
 

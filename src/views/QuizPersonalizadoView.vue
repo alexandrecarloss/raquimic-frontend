@@ -89,8 +89,7 @@ async function salvarQuiz() {
     nome: nome.value,
     perguntas: selecionadas.value
   }
-
-  const res = await api.post("/quiz-personalizado/", payload)
+  const res = await api.post("/quizzes/criar-personalizado/", payload)
   router.push(`/quiz/jogar/${res.data.id}`)
 }
 </script>
