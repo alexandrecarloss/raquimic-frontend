@@ -7,4 +7,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1500, // aumenta limite para 1.5mb
   },
+  server: {
+    historyApiFallback: true, 
+  }
 });
