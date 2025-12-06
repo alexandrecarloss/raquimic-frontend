@@ -11,6 +11,12 @@
       </RouterLink>
     </div>
 
+    <div class="flex gap-2 mt-4">
+      <button @click="carregarPerguntas(prevPage)" :disabled="!prevPage">Anterior</button>
+      <button @click="carregarPerguntas(nextPage)" :disabled="!nextPage">Próximo</button>
+    </div>
+
+
     <div class="bg-gray-900 shadow rounded-xl p-4">
       <table class="w-full border-collapse">
         <thead>
@@ -64,13 +70,19 @@ export default {
   data() {
     return {
       perguntas: [],
+      next: null,
+      prev: null,
+      total: 0,
     };
   },
   methods: {
-    async carregarPerguntas() {
+    async carregarPerguntas(page = 1) {
       try {
-        const resp = await api.get("/perguntas/");
-        this.perguntas = resp.data;
+        const resp = await api.get(`/perguntas/?page=${page}`);
+        this.perguntas = resp.data.results;
+        this.total = resp.data.count;
+        this.next = resp.data.next;
+        this.prev = resp.data.previous;
       } catch (e) {
         console.error("Erro ao carregar perguntas:", e);
       }
@@ -90,5 +102,16 @@ export default {
   mounted() {
     this.carregarPerguntas();
   },
+  computed: {
+    nextPage() {
+      if (!this.next) return null;
+      const url = new URL(this.next);
+      return url.searchParams.get("page");
+    },
+    prevPage() {
+      return this.prev ? new URL(this.prev).searchParams.get("page") : null;
+    }
+  }
+
 };
 </script>

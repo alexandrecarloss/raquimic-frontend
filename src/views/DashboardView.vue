@@ -173,8 +173,8 @@ function formatDate(ts) {
 async function carregarStats() {
   try {
     const [p, m] = await Promise.all([
-      api.get("/perguntas/count/"),
-      api.get("/moleculas/count/")
+      api.get("/perguntas-total/"),
+      api.get("/perguntas-total/")
     ]);
 
     stats.value.perguntas = p.data.count;
