@@ -65,7 +65,7 @@ export default {
     async carregar() {
       try {
         const resp = await api.get("/moleculas/");
-        this.moleculas = resp.data;
+        this.moleculas = resp.data.results;
       } catch (e) {
         console.error("Erro ao carregar moléculas:", e);
       }

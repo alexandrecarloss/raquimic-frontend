@@ -63,7 +63,7 @@ export default {
   },
   async mounted() {
     const resp = await api.get("/quizzes/")
-    this.quizzes = resp.data
+    this.quizzes = resp.data.results
   },
   methods: {
     async deletarQuiz(id) {

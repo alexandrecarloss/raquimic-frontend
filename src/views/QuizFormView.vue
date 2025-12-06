@@ -91,7 +91,7 @@ const isEdit = computed(() => !!route.params.id)
 // ========================
 onMounted(async () => {
   const resPerg = await api.get("/perguntas/")
-  perguntas.value = resPerg.data
+  perguntas.value = resPerg.data.results
 
   if (isEdit.value) {
     const res = await api.get(`/quizzes/${route.params.id}/`)

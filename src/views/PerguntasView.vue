@@ -11,11 +11,29 @@
       </RouterLink>
     </div>
 
-    <div class="flex gap-2 mt-4">
-      <button @click="carregarPerguntas(prevPage)" :disabled="!prevPage">Anterior</button>
-      <button @click="carregarPerguntas(nextPage)" :disabled="!nextPage">Próximo</button>
-    </div>
+    <div class="flex justify-center mt-6">
+      <div class="bg-gray-800 px-6 py-4 rounded-xl shadow-lg flex gap-4">
+        
+        <button
+          @click="carregarPerguntas(prevPage)"
+          :disabled="!prevPage"
+          class="px-5 py-2 rounded-lg font-medium transition
+                bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ◀ Anterior
+        </button>
 
+        <button
+          @click="carregarPerguntas(nextPage)"
+          :disabled="!nextPage"
+          class="px-5 py-2 rounded-lg font-medium transition
+                bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Próximo ▶
+        </button>
+
+      </div>
+    </div>
 
     <div class="bg-gray-900 shadow rounded-xl p-4">
       <table class="w-full border-collapse">
@@ -109,7 +127,12 @@ export default {
       return url.searchParams.get("page");
     },
     prevPage() {
-      return this.prev ? new URL(this.prev).searchParams.get("page") : null;
+      if (!this.prev) return null;
+
+      const url = new URL(this.prev);
+      const page = url.searchParams.get("page");
+
+      return page ? page : 1; // se não vier page, é a página 1
     }
   }
 
