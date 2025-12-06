@@ -3,23 +3,28 @@
 
     <!-- TÍTULO -->
     <h1 class="text-3xl font-bold">Dashboard</h1>
+    <div v-if="loadingStats" class="w-full py-6 text-center">
+      <div class="animate-spin w-8 h-8 border-4 border-gray-300 border-t-indigo-600 rounded-full mx-auto"></div>
+      <p class="text-gray-600 mt-2">Carregando estatísticas...</p>
+    </div>
+    <div v-else>
+      <!-- CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card">
+          <h2 class="card-title">Total de Perguntas</h2>
+          <p class="card-value">{{ stats.perguntas }}</p>
+        </div>
 
-    <!-- CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="card">
-        <h2 class="card-title">Total de Perguntas</h2>
-        <p class="card-value">{{ stats.perguntas }}</p>
-      </div>
+        <div class="card">
+          <h2 class="card-title">Moléculas Cadastradas</h2>
+          <p class="card-value">{{ stats.moleculas }}</p>
+        </div>
 
-      <div class="card">
-        <h2 class="card-title">Moléculas Cadastradas</h2>
-        <p class="card-value">{{ stats.moleculas }}</p>
-      </div>
-
-      <div class="card">
-        <h2 class="card-title">Salas Ativas (Firebase)</h2>
-        <p class="card-value">{{ salas.length }}</p>
-        <p class="text-sm text-gray-500 mt-2">Gerencie salas ao lado</p>
+        <div class="card">
+          <h2 class="card-title">Salas Ativas (Firebase)</h2>
+          <p class="card-value">{{ salas.length }}</p>
+          <p class="text-sm text-gray-500 mt-2">Gerencie salas ao lado</p>
+        </div>
       </div>
     </div>
 
@@ -27,6 +32,10 @@
     <div class="card h-72">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Perguntas x Moléculas</h2>
       <canvas ref="chartCanvas" class="w-full h-full"></canvas>
+    </div>
+
+    <div v-if="loadingSalas" class="py-4 text-center text-gray-500">
+      Carregando salas...
     </div>
 
     <!-- SALAS -->
@@ -49,7 +58,7 @@
             <div>
               <div class="font-semibold">ID: {{ s.id }}</div>
               <div class="text-sm text-gray-600">
-                Host: {{ s.hostName || '—' }} • Jogadores: {{ s.players?.length || 0 }}
+                Host: {{ s.hostName || '—' }} • Jogadores: {{ s.jogadores?.length || 0 }}
               </div>
               <div class="text-xs text-gray-500">
                 Criada: {{ formatDate(s.createdAt) }}
@@ -108,7 +117,10 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import api from "../api/api";
 import { rtdb } from "../firebase";
-import { ref as dbRef, onValue } from "firebase/database";
+import { ref as dbRef, onValue, remove } from "firebase/database";
+const loadingStats = ref(true);
+const loadingSalas = ref(true);
+
 
 onValue(dbRef(rtdb, "salas/"), (snapshot) => {
   console.log(snapshot.val());
@@ -138,9 +150,6 @@ Chart.register(
   Legend
 );
 
-// Firebase
-import { db, collection, onSnapshot, deleteDoc, doc } from "../firebase";
-
 const stats = ref({ perguntas: 0, moleculas: 0 });
 const chartCanvas = ref(null);
 let chartInstance = null;
@@ -164,12 +173,12 @@ function formatDate(ts) {
 async function carregarStats() {
   try {
     const [p, m] = await Promise.all([
-      api.get("/perguntas/"),
-      api.get("/moleculas/")
+      api.get("/perguntas/count/"),
+      api.get("/moleculas/count/")
     ]);
 
-    stats.value.perguntas = Array.isArray(p.data) ? p.data.length : (p.data.count ?? 0);
-    stats.value.moleculas  = Array.isArray(m.data) ? m.data.length : (m.data.count ?? 0);
+    stats.value.perguntas = p.data.count;
+    stats.value.moleculas = m.data.count;
 
     atualizarGrafico();
   } catch (e) {
@@ -238,43 +247,45 @@ function ligarMonitorSalasRealtime() {
 
   onValue(salasRef, (snapshot) => {
     const data = snapshot.val();
+    salas.value = data
+    ? Object.entries(data).map(([id, item]) => ({
+        id,
+        createdAt: item.createdAt,
+        hostName: item.hostName,
+        jogadores: item.jogadores ? Object.keys(item.jogadores) : [], // <-- CORREÇÃO
+      }))
+    : [];
 
-    if (!data) {
-      salas.value = [];
-      return;
-    }
-
-    // transforma o objeto em array
-    salas.value = Object.keys(data).map(id => ({
-      id,
-      ...data[id]
-    }))
-    .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
   });
 }
 
-
 async function encerrarSala(id) {
   if (!confirm("Encerrar esta sala?")) return;
+
   try {
-    await deleteDoc(doc(db, "salas", id));
+    await remove(dbRef(rtdb, `salas/${id}`));
   } catch (e) {
     console.error("Erro ao encerrar sala:", e);
   }
 }
 
 function openSala(s) {
-  alert(`Abrindo sala ${s.id} — jogadores: ${s.players?.length || 0}`);
+  alert(`Abrindo sala ${s.id} — jogadores: ${s.jogadores?.length || 0}`);
 }
 
 // -----------------------------------------------------------------------------------
 // CICLO DE VIDA
 // -----------------------------------------------------------------------------------
 onMounted(async () => {
-  await carregarStats(); // já chama atualizarGrafico()
-  ligarMonitorSalasRealtime();
+  loadingStats.value = true;
 
+  await carregarStats();
+  loadingStats.value = false;
+
+  ligarMonitorSalasRealtime();
+  setTimeout(() => loadingSalas.value = false, 300); // só para não "piscar"
 });
+
 
 onBeforeUnmount(() => {
   if (unsubscribeSalas) unsubscribeSalas();
