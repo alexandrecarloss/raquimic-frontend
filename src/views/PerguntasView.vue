@@ -15,8 +15,8 @@
       <div class="bg-gray-800 px-6 py-4 rounded-xl shadow-lg flex gap-4">
         
         <button
-          @click="carregarPerguntas(prevPage)"
-          :disabled="!prevPage"
+          @click="carregarPerguntas(prev)"
+          :disabled="!prev"
           class="px-5 py-2 rounded-lg font-medium transition
                 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -24,8 +24,8 @@
         </button>
 
         <button
-          @click="carregarPerguntas(nextPage)"
-          :disabled="!nextPage"
+          @click="carregarPerguntas(next)"
+          :disabled="!next"
           class="px-5 py-2 rounded-lg font-medium transition
                 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -56,7 +56,7 @@
         </thead>
 
         <tbody>
-          <tr v-for="p in perguntasFiltradas" :key="p.id">
+          <tr v-for="p in perguntas" :key="p.id">
             <td class="p-3">{{ p.enunciado }}</td>
 
             <td class="p-3">
@@ -101,17 +101,22 @@ export default {
       next: null,
       prev: null,
       total: 0,
-      filtro: ""
+      filtro: "",
+      searchTimeout: null
     };
   },
   methods: {
-    async carregarPerguntas(page = 1) {
+    async carregarPerguntas(url = "/perguntas/") {
       try {
-        const resp = await api.get(`/perguntas/?page=${page}`);
+        const resp = url.startsWith("http")
+          ? await api.get(url, { baseURL: "" }) // evita duplicação do baseURL
+          : await api.get(url);
+
         this.perguntas = resp.data.results;
         this.total = resp.data.count;
         this.next = resp.data.next;
         this.prev = resp.data.previous;
+
       } catch (e) {
         console.error("Erro ao carregar perguntas:", e);
       }
@@ -131,16 +136,22 @@ export default {
   mounted() {
     this.carregarPerguntas();
   },
-  computed: {
-    perguntasFiltradas() {
-    const txt = this.filtro.toLowerCase();
+  watch: {
+    filtro() {
+      clearTimeout(this.searchTimeout);
 
-    return this.perguntas.filter(p => {
-      const enun = p.enunciado.toLowerCase();
-      const mol = p.molecula ? p.molecula.nome.toLowerCase() : "";
-      return enun.includes(txt) || mol.includes(txt);
-    });
-    },
+      this.searchTimeout = setTimeout(() => {
+        const term = this.filtro.trim();
+
+        if (term === "") {
+          this.carregarPerguntas("/perguntas/");
+        } else {
+          this.carregarPerguntas(`/perguntas/?search=${term}`);
+        }
+      }, 400);
+    }
+  },
+  computed: {
     nextPage() {
       if (!this.next) return null;
       const url = new URL(this.next);
