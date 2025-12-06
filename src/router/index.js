@@ -7,11 +7,14 @@ import PerguntasView from '../views/PerguntasView.vue'
 import EditarPerguntaView from '../views/EditarPerguntaView.vue'
 import MoleculaFormView from '../views/MoleculaFormView.vue'
 import MoleculasView from '../views/MoleculasView.vue'
-import CriarQuizView from '../views/QuizPersonalizadoView.vue'
-import QuizPersonalizadoView from '../views/QuizPersonalizadoView.vue'
+import QuizFormView from '../views/QuizFormView.vue'
+import QuizzesView from '../views/QuizzesView.vue'
 
 const routes = [
-  { path: "/login", meta: { public: true, name: 'login' }, component: LoginView },
+  { path: "/login", 
+    meta: { public: true, name: 'login' }, 
+    component: LoginView 
+  },
 
   {
     path: '/',
@@ -61,21 +64,28 @@ const routes = [
     props: true,
     meta: { requiresAuth: true }
   },
-  
+
   {
-    path: "/quiz/personalizado",
-    name: "QuizPersonalizado",
-    component: QuizPersonalizadoView,
+    path: "/quizzes",
+    name: "Quizzes",
+    component: QuizzesView,
     meta: { requiresAuth: true }
   },
 
   {
-    path: "/criar-quiz",
-    name: "CriarQuiz",
-    component: CriarQuizView,
+    path: "/quizzes/nova",
+    name: "NovoQuiz",
+    component: QuizFormView,
     meta: { requiresAuth: true }
-  }
+  },
 
+  {
+    path: "/quizzes/:id/editar",
+    name: "EditarQuiz",
+    component: QuizFormView, 
+    props: true,
+    meta: { requiresAuth: true }
+  },
 ]
 
 const router = createRouter({
