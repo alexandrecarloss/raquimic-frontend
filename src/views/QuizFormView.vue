@@ -33,26 +33,47 @@
           </button>
         </div>
 
-        <!-- Lista de perguntas -->
         <div class="block">
           <span class="font-semibold">Perguntas</span>
 
+          <!-- 🔍 Busca -->
+          <input 
+            v-model="busca" 
+            @input="buscarPerguntas" 
+            placeholder="Buscar pergunta..." 
+            class="w-full border p-2 rounded bg-gray-800 mt-2"
+          />
+
           <div class="max-h-96 overflow-y-auto border rounded p-3 bg-gray-700 mt-2">
             <div
-              v-for="p in perguntas"
+              v-for="p in perguntasFiltradas"
               :key="p.id"
               class="flex justify-between border-b py-2"
             >
               <span>{{ p.enunciado }}</span>
-              <input
-                type="checkbox"
-                v-model="form.perguntas"
-                :value="p.id"
-              />
+              <input type="checkbox" v-model="form.perguntas" :value="p.id"/>
             </div>
           </div>
-        </div>
 
+          <!-- 🔄 Paginação -->
+          <div class="flex justify-between mt-3">
+            <button 
+              class="btn-green" 
+              :disabled="!previous"
+              @click="carregarPagina(previous)"
+            >
+              Anterior
+            </button>
+
+            <button 
+              class="btn-green" 
+              :disabled="!next"
+              @click="carregarPagina(next)"
+            >
+              Próxima
+            </button>
+          </div>
+        </div>
       </div>
 
       <button class="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
@@ -70,28 +91,48 @@ import { useRoute, useRouter } from "vue-router"
 const route = useRoute()
 const router = useRouter()
 
-// ========================
-// Dados principais
-// ========================
 const perguntas = ref([])
+const next = ref(null)
+const previous = ref(null)
+const busca = ref("")
 
 const form = ref({
   nome: "",
   perguntas: []
 })
 
-// Apenas na criação
 const qtd = ref(5)
 const dificuldade = ref("")
-
 const isEdit = computed(() => !!route.params.id)
+const perguntasFiltradas = computed(() => perguntas.value)
 
-// ========================
-// Carregamento inicial
-// ========================
+let searchTimeout = null
+
+function buscarPerguntas() {
+  clearTimeout(searchTimeout)
+
+  searchTimeout = setTimeout(async () => {
+    await carregarPagina(`/perguntas/?search=${busca.value}`)
+  }, 300) // debounce
+}
+
+
+// =============================
+// Função genérica para carregar qualquer URL
+// =============================
+async function carregarPagina(url = "/perguntas/") {
+  const res = await api.get(url)
+
+  perguntas.value = res.data.results
+  next.value = res.data.next
+  previous.value = res.data.previous
+}
+
+// =============================
+// Load inicial
+// =============================
 onMounted(async () => {
-  const resPerg = await api.get("/perguntas/")
-  perguntas.value = resPerg.data.results
+  await carregarPagina()
 
   if (isEdit.value) {
     const res = await api.get(`/quizzes/${route.params.id}/`)
@@ -100,9 +141,9 @@ onMounted(async () => {
   }
 })
 
-// ========================
-// Geração automática
-// ========================
+// =============================
+// Gerar automático
+// =============================
 function gerarAutomatico() {
   let filtradas = perguntas.value
 
@@ -116,9 +157,9 @@ function gerarAutomatico() {
     .map(p => p.id)
 }
 
-// ========================
-// Salvar (create/edit)
-// ========================
+// =============================
+// Salvar
+// =============================
 async function salvar() {
   const payload = {
     nome: form.value.nome,
