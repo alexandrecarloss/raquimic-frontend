@@ -174,7 +174,7 @@ async function carregarStats() {
   try {
     const [p, m] = await Promise.all([
       api.get("/perguntas-total/"),
-      api.get("/perguntas-total/")
+      api.get("/moleculas-total/")
     ]);
 
     stats.value.perguntas = p.data.count;
