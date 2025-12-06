@@ -118,7 +118,7 @@ const isEdit = computed(() => !!route.params.id)
 
 onMounted(async () => {
   const resMol = await api.get("/moleculas/")
-  moleculas.value = resMol.data
+  moleculas.value = resMol.data.results ?? resMol.data
 
   if (isEdit.value) {
     const res = await api.get(`/perguntas/${route.params.id}/`)
