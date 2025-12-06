@@ -11,6 +11,16 @@
       </RouterLink>
     </div>
 
+    <div class="mb-4 flex justify-end">
+      <input
+        v-model="filtro"
+        type="text"
+        placeholder="Buscar quiz..."
+        class="px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 w-64"
+      />
+    </div>
+
+
     <div class="bg-gray-900 shadow rounded-xl p-4">
       <table class="w-full border-collapse">
         <thead>
@@ -22,7 +32,7 @@
         </thead>
 
         <tbody>
-          <tr v-for="q in quizzes" :key="q.id">
+          <tr v-for="q in quizzesFiltrados" :key="q.id">
             <td class="p-3">{{ q.nome }}</td>
             <td class="p-3">{{ q.perguntas.length }}</td>
 
@@ -58,7 +68,18 @@ import api from "../api/api"
 export default {
   data() {
     return {
-      quizzes: []
+      quizzes: [],
+      filtro: ""
+    };
+  },
+  computed: {
+    quizzesFiltrados() {
+      const txt = this.filtro.toLowerCase();
+
+      return this.quizzes.filter(q =>
+        q.nome.toLowerCase().includes(txt) ||
+        q.perguntas.length.toString().includes(txt)
+      );
     }
   },
   async mounted() {

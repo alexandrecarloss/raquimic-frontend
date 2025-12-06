@@ -35,6 +35,16 @@
       </div>
     </div>
 
+    <div class="mb-4 flex justify-end">
+      <input
+        v-model="filtro"
+        type="text"
+        placeholder="Buscar pergunta..."
+        class="px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 w-80"
+      />
+    </div>
+
+
     <div class="bg-gray-900 shadow rounded-xl p-4">
       <table class="w-full border-collapse">
         <thead>
@@ -46,7 +56,7 @@
         </thead>
 
         <tbody>
-          <tr v-for="p in perguntas" :key="p.id">
+          <tr v-for="p in perguntasFiltradas" :key="p.id">
             <td class="p-3">{{ p.enunciado }}</td>
 
             <td class="p-3">
@@ -91,6 +101,7 @@ export default {
       next: null,
       prev: null,
       total: 0,
+      filtro: ""
     };
   },
   methods: {
@@ -121,6 +132,15 @@ export default {
     this.carregarPerguntas();
   },
   computed: {
+    perguntasFiltradas() {
+    const txt = this.filtro.toLowerCase();
+
+    return this.perguntas.filter(p => {
+      const enun = p.enunciado.toLowerCase();
+      const mol = p.molecula ? p.molecula.nome.toLowerCase() : "";
+      return enun.includes(txt) || mol.includes(txt);
+    });
+    },
     nextPage() {
       if (!this.next) return null;
       const url = new URL(this.next);
@@ -135,6 +155,5 @@ export default {
       return page ? page : 1; // se não vier page, é a página 1
     }
   }
-
 };
 </script>

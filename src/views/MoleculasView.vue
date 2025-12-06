@@ -11,6 +11,17 @@
       </RouterLink>
     </div>
 
+    <div class="mb-4 flex justify-end">
+      <input
+        v-model="filtro"
+        type="text"
+        placeholder="Buscar molécula..."
+        class="px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 w-64"
+      />
+    </div>
+
+
+
     <div class="bg-gray-900 shadow rounded-xl p-4">
       <table class="w-full border-collapse">
         <thead>
@@ -22,7 +33,7 @@
         </thead>
 
         <tbody>
-          <tr v-for="m in moleculas" :key="m.id">
+          <tr v-for="m in moleculasFiltradas" :key="m.id">
             <td class="p-3">{{ m.nome }}</td>
             <td class="p-3">{{ m.formula }}</td>
 
@@ -59,7 +70,17 @@ export default {
   data() {
     return {
       moleculas: [],
+      filtro: ""
     };
+  },
+  computed: {
+    moleculasFiltradas() {
+      const txt = this.filtro.toLowerCase();
+      return this.moleculas.filter(m =>
+        m.nome.toLowerCase().includes(txt) ||
+        m.formula.toLowerCase().includes(txt)
+      );
+    }
   },
   methods: {
     async carregar() {
